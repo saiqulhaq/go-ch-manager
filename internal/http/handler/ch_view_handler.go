@@ -147,9 +147,11 @@ func (h *ViewHandler) ConnectionMenu(c *fiber.Ctx) error {
 	serverInfo, _ := h.usecase.GetServerInfo(c.Context(), id)
 
 	return h.render(c, "connections/menu", fiber.Map{
-		"Connection": target,
-		"ServerInfo": serverInfo,
-		"PageTitle":  "Connection: " + target.Name,
+		"Connection":   target,
+		"ConnectionID": target.ID,
+		"ServerInfo":   serverInfo,
+		"PageTitle":    "Connection: " + target.Name,
+		"ActiveMenu":   " overview",
 	})
 }
 
@@ -202,6 +204,7 @@ func (h *ViewHandler) ConnectionTables(c *fiber.Ctx) error {
 		"PageTitle":    "Dashboard",
 		"Databases":    dbs,
 		"SelectedDB":   selectedDB,
+		"ActiveMenu":   " explorer",
 		// Removing GroupedTables, Stats, TotalTables as they are now JS driven
 	})
 }
@@ -209,8 +212,9 @@ func (h *ViewHandler) ConnectionTables(c *fiber.Ctx) error {
 func (h *ViewHandler) TableDetails(c *fiber.Ctx) error {
 	id, _ := strconv.ParseInt(c.Params("id"), 10, 64)
 	tableName := c.Params("table")
+	dbName := c.Query("db")
 
-	schema, createSQL, err := h.usecase.GetSchema(c.Context(), id, tableName)
+	schema, createSQL, err := h.usecase.GetSchema(c.Context(), id, tableName, dbName)
 	if err != nil {
 		return h.render(c, "error", fiber.Map{"Error": err.Error()})
 	}
@@ -220,6 +224,7 @@ func (h *ViewHandler) TableDetails(c *fiber.Ctx) error {
 		"Schema":       schema,
 		"CreateSQL":    createSQL,
 		"PageTitle":    "Table: " + tableName,
+		"ActiveMenu":   " explorer",
 	})
 }
 
@@ -233,6 +238,7 @@ func (h *ViewHandler) ComparePage(c *fiber.Ctx) error {
 	return h.render(c, "connections/compare", fiber.Map{
 		"ConnectionID": id,
 		"Status":       conn,
+		"ActiveMenu":   " compare",
 	})
 }
 
@@ -241,5 +247,6 @@ func (h *ViewHandler) ConsolePage(c *fiber.Ctx) error {
 	return h.render(c, "connections/console", fiber.Map{
 		"ConnectionID": id,
 		"PageTitle":    "Query Console",
+		"ActiveMenu":   " console",
 	})
 }

@@ -17,8 +17,9 @@ type CHConnection struct {
 }
 
 type TableSchema struct {
-	Name    string              `json:"name"`
-	Columns []TableSchemaColumn `json:"columns"`
+	Name     string              `json:"name"`
+	Database string              `json:"database"`
+	Columns  []TableSchemaColumn `json:"columns"`
 }
 
 type TableSchemaColumn struct {

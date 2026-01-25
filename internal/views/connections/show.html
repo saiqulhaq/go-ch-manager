@@ -189,7 +189,7 @@
             method: 'GET',
             success: function (response) {
                 allTables = response.data || [];
-                renderDashboard(allTables, connId);
+                renderDashboard(allTables, connId, db);
                 $('#loading-state').fadeOut(200, function () {
                     $('#dashboard-content').fadeIn(300);
                 });
@@ -208,11 +208,11 @@
         $('#table-search').on('input', function () {
             const query = $(this).val().toLowerCase();
             const filtered = allTables.filter(t => t.name.toLowerCase().includes(query));
-            renderDashboard(filtered, connId);
+            renderDashboard(filtered, connId, db);
         });
     });
 
-    function renderDashboard(tables, connId) {
+    function renderDashboard(tables, connId, db) {
         if (!tables || tables.length === 0) {
             $('#no-tables-msg').removeClass('hidden');
             $('#stats-container').parent().addClass('hidden'); // Hide stats if no tables? Actually keeps stats visible usually better, but if 0 tables maybe hide. 
@@ -306,7 +306,7 @@
                 if (group === "Materialized Views") { iconColor = "text-pink-500"; borderColor = "group-hover:border-pink-500/50"; }
 
                 tablesHtml += `
-                <a href="/connections/${connId}/tables/${t.name}" class="group relative bg-gray-900/40 p-5 rounded-xl border border-gray-800 ${borderColor} hover:shadow-lg hover:shadow-primary-900/20 hover:bg-gray-800 transition-all duration-300 block overflow-hidden">
+                <a href="/connections/${connId}/tables/${t.name}?db=${db}" class="group relative bg-gray-900/40 p-5 rounded-xl border border-gray-800 ${borderColor} hover:shadow-lg hover:shadow-primary-900/20 hover:bg-gray-800 transition-all duration-300 block overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 duration-300">
                         <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

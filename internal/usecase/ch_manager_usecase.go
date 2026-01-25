@@ -107,13 +107,18 @@ func (u *ConnectionUsecase) GetTables(ctx context.Context, id int64, db ...strin
 	return u.chClient.GetTables(ctx, conn)
 }
 
-func (u *ConnectionUsecase) GetSchema(ctx context.Context, id int64, table string) (*entity.TableSchema, string, error) {
+func (u *ConnectionUsecase) GetSchema(ctx context.Context, id int64, table string, db ...string) (*entity.TableSchema, string, error) {
 	conn, err := u.repo.FindByID(ctx, id)
 	if err != nil {
 		return nil, "", err
 	}
 	if conn == nil {
 		return nil, "", nil
+	}
+
+	// Override database if provided
+	if len(db) > 0 && db[0] != "" {
+		conn.Database = db[0]
 	}
 
 	schema, err := u.chClient.GetSchema(ctx, conn, table)

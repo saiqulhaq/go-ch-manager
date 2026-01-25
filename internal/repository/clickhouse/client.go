@@ -247,8 +247,9 @@ func (c *clientImpl) GetSchema(ctx context.Context, conn *entity.CHConnection, t
 	defer rows.Close()
 
 	schema := &entity.TableSchema{
-		Name:    tableName,
-		Columns: []entity.TableSchemaColumn{},
+		Name:     tableName,
+		Database: conn.Database,
+		Columns:  []entity.TableSchemaColumn{},
 	}
 
 	for rows.Next() {
