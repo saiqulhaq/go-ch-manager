@@ -1,0 +1,180 @@
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-white">Query Console</h1>
+        <a href="/connections/{{.ConnectionID}}" class="text-gray-400 hover:text-white">&larr; Back to Menu</a>
+    </div>
+
+    <!-- Query Editor -->
+    <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-6">
+        <div class="mb-2 flex justify-between items-center">
+            <label class="text-gray-400 text-sm font-medium">SQL Query</label>
+            <button id="run-query-btn"
+                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-1 px-4 rounded transition flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Run
+            </button>
+        </div>
+        <textarea id="query-input"
+            class="w-full h-32 bg-gray-900 text-white font-mono text-sm p-3 rounded border border-gray-700 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="SELECT * FROM system.tables LIMIT 10">SELECT * FROM system.tables LIMIT 10</textarea>
+        <div id="query-error" class="text-red-400 text-sm mt-2 hidden"></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-indicator" class="hidden text-center py-10">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-2"></div>
+        <p class="text-gray-400 text-sm">Executing query...</p>
+    </div>
+
+    <!-- Results Area -->
+    <div id="results-area" class="hidden">
+
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Duration</div>
+                <div class="text-lg font-bold text-white" id="stat-duration">-</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Rows Read</div>
+                <div class="text-lg font-bold text-white" id="stat-rows">-</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Bytes Read</div>
+                <div class="text-lg font-bold text-white" id="stat-bytes">-</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Memory Peak</div>
+                <div class="text-lg font-bold text-white" id="stat-memory">-</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Parts Read</div>
+                <div class="text-lg font-bold text-white" id="stat-parts">-</div>
+            </div>
+            <div class="bg-gray-800 p-3 rounded border border-gray-700">
+                <div class="text-xs text-gray-500 uppercase">Marks Read</div>
+                <div class="text-lg font-bold text-white" id="stat-marks">-</div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-400">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                        <tr id="table-header">
+                            <!-- Headers injected via JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-results" class="hidden p-8 text-center text-gray-500">
+                No rows returned
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const connId = "{{.ConnectionID}}";
+
+    $(document).ready(function () {
+        $('#run-query-btn').click(function () {
+            const query = $('#query-input').val().trim();
+            if (!query) return;
+
+            // Reset UI
+            $('#query-error').addClass('hidden').text('');
+            $('#results-area').addClass('hidden');
+            $('#loading-indicator').removeClass('hidden');
+
+            $.ajax({
+                url: `/api/v1/connections/${connId}/query`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ query: query }),
+                success: function (response) {
+                    $('#loading-indicator').addClass('hidden');
+                    renderResults(response.data);
+                },
+                error: function (err) {
+                    $('#loading-indicator').addClass('hidden');
+                    const msg = err.responseJSON?.message || err.responseText || "Query failed";
+                    $('#query-error').text(msg).removeClass('hidden');
+                }
+            });
+        });
+    });
+
+    function renderResults(data) {
+        if (!data) return;
+
+        // Render Stats
+        const stats = data.stats || {};
+        $('#stat-duration').text((stats.execution_time_ms || 0) + ' ms');
+        $('#stat-rows').text(formatNumber(stats.rows_read || 0));
+        $('#stat-bytes').text(formatBytes(stats.bytes_read || 0));
+        $('#stat-memory').text(formatBytes(stats.memory_peak || 0));
+        $('#stat-parts').text(formatNumber(stats.parts_read || 0));
+        $('#stat-marks').text(formatNumber(stats.marks_read || 0));
+
+        // Render Table
+        const cols = data.columns || [];
+        const rows = data.rows || [];
+
+        // Headers
+        const headerHtml = cols.map(c => `<th scope="col" class="px-6 py-3 border-b border-gray-700 whitespace-nowrap">${c}</th>`).join('');
+        $('#table-header').html(headerHtml);
+
+        // Body
+        if (rows.length === 0) {
+            $('#table-body').empty();
+            $('#no-results').removeClass('hidden');
+        } else {
+            $('#no-results').addClass('hidden');
+            const rowsHtml = rows.map(r => {
+                const cells = cols.map(c => {
+                    const val = r[c];
+                    const display = val === null ? '<span class="text-gray-600">NULL</span>' : escapeHtml(String(val));
+                    return `<td class="px-6 py-4 border-b border-gray-800 whitespace-nowrap text-gray-300 font-mono">${display}</td>`;
+                }).join('');
+                return `<tr class="bg-gray-800 hover:bg-gray-700 transition">${cells}</tr>`;
+            }).join('');
+            $('#table-body').html(rowsHtml);
+        }
+
+        $('#results-area').removeClass('hidden');
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (!+bytes) return '0 B';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+    }
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function escapeHtml(text) {
+        if (!text) return text;
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>

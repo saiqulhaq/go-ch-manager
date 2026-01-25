@@ -1,0 +1,166 @@
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+
+            <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+            {{if .Databases}}
+            <select onchange="window.location.href='?db='+this.value"
+                class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
+                <option value="" disabled {{if not .SelectedDB}}selected{{end}}>Select Database</option>
+                {{$selected := .SelectedDB}}
+                {{range .Databases}}
+                <option value="{{.}}" {{if eq $selected .}}selected{{end}}>{{.}}</option>
+                {{end}}
+            </select>
+            {{end}}
+            <a href="/connections/{{.ConnectionID}}/compare"
+                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded transition">
+                Compare Query
+            </a>
+        </div>
+        <a href="/connections/{{.ConnectionID}}" class="text-gray-400 hover:text-white">&larr; Back to Menu</a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div id="loading-state" class="py-20 text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p class="text-gray-400">Loading tables...</p>
+    </div>
+
+    <div id="dashboard-content" class="hidden">
+        <h2 class="text-xl font-semibold text-gray-300 mb-6" id="db-title-display">Database: <span
+                class="text-white">{{.SelectedDB}}</span></h2>
+
+        <!-- Stats Container -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative mb-8">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg>
+            </div>
+            <input type="text" id="table-search"
+                class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-700 rounded-lg bg-gray-800 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 text-white"
+                placeholder="Search tables...">
+        </div>
+
+        <!-- Tables Container -->
+        <div id="tables-container">
+            <!-- Populated by JS -->
+        </div>
+
+        <div id="no-tables-msg"
+            class="hidden text-center py-20 bg-gray-800 rounded border border-gray-700 border-dashed">
+            <p class="text-gray-500 text-lg">No tables found matching your criteria.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const connId = "{{.ConnectionID}}";
+    let allTables = []; // Store all tables for client-side filtering
+
+    $(document).ready(function () {
+        const db = "{{.SelectedDB}}";
+
+        // Show loading (already visible by default structure, keeping explicit)
+        $('#loading-state').show();
+        $('#dashboard-content').hide();
+
+        $.ajax({
+            url: `/api/v1/connections/${connId}/tables?db=${db}`,
+            method: 'GET',
+            success: function (response) {
+                allTables = response.data || []; // Store globally
+                renderDashboard(allTables, connId);
+                $('#loading-state').hide();
+                $('#dashboard-content').fadeIn();
+            },
+            error: function (err) {
+                $('#loading-state').html(`<p class="text-red-500">Error loading data: ${err.responseText || 'Unknown error'}</p>`);
+            }
+        });
+
+        // Search Listener
+        $('#table-search').on('input', function () {
+            const query = $(this).val().toLowerCase();
+            const filtered = allTables.filter(t => t.name.toLowerCase().includes(query));
+            renderDashboard(filtered, connId);
+        });
+    });
+
+    function renderDashboard(tables, connId) {
+        if (!tables || tables.length === 0) {
+            $('#no-tables-msg').removeClass('hidden');
+            return;
+        }
+
+        const stats = {};
+        const grouped = {};
+        let total = tables.length;
+
+        // Grouping Logic
+        tables.forEach(t => {
+            let group = "Tables";
+            if (t.engine === "View") group = "Views";
+            else if (t.engine === "MaterializedView") group = "Materialized Views";
+            else if (t.engine === "Dictionary") group = "Dictionaries";
+
+            if (!grouped[group]) grouped[group] = [];
+            grouped[group].push(t);
+
+            stats[group] = (stats[group] || 0) + 1;
+        });
+
+        // Render Stats
+        let statsHtml = `
+            <div class="bg-gray-800 p-4 rounded border border-gray-700">
+                <h3 class="text-sm font-medium text-gray-400 uppercase">Total Tables</h3>
+                <p class="text-3xl font-bold text-white mt-1">${total}</p>
+            </div>
+        `;
+
+        Object.keys(stats).forEach(key => {
+            statsHtml += `
+            <div class="bg-gray-800 p-4 rounded border border-gray-700">
+                <h3 class="text-sm font-medium text-gray-400 uppercase">${key}</h3>
+                <p class="text-3xl font-bold text-white mt-1">${stats[key]}</p>
+            </div>`;
+        });
+        $('#stats-container').html(statsHtml);
+
+        // Render Tables
+        let tablesHtml = '';
+        Object.keys(grouped).forEach(group => {
+            tablesHtml += `
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-blue-400 mb-4 border-b border-gray-700 pb-2">${group}</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            `;
+
+            grouped[group].forEach(t => {
+                tablesHtml += `
+                <a href="/connections/${connId}/tables/${t.name}" class="bg-gray-800 p-4 rounded border border-gray-700 hover:border-blue-500 hover:shadow-lg transition block group">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="font-medium text-gray-500 text-xs uppercase tracking-wide">${t.engine}</div>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 group-hover:text-blue-500 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </div>
+                    <div class="text-xl font-bold text-gray-100 truncate" title="${t.name}">${t.name}</div>
+                </a>
+                `;
+            });
+
+            tablesHtml += `</div></div>`;
+        });
+        $('#tables-container').html(tablesHtml);
+    }
+</script>

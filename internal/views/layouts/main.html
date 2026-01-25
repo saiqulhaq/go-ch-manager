@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.PageTitle}} - Go CH Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- NProgress -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <style>
+        #nprogress .bar {
+            background: #3b82f6 !important;
+            height: 8px !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-100 font-sans antialiased">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+            <div class="h-16 flex items-center px-6 border-b border-gray-700">
+                <a href="/" class="text-xl font-bold text-white flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        </svg>
+                    </div>
+                    CH Manager
+                </a>
+            </div>
+
+            <div class="flex-1 overflow-y-auto py-4">
+                <div class="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Connections</div>
+                <nav class="space-y-1 px-2">
+                    <a href="/"
+                        class="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-300" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        All Connections
+                    </a>
+
+                    {{range .SidebarConnections}}
+                    <a href="/connections/{{.ID}}"
+                        class="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition">
+                        <span class="w-2.5 h-2.5 mr-3 rounded-full bg-green-500"></span>
+                        <!-- Dynamic status color would be nice here -->
+                        {{.Name}}
+                    </a>
+                    {{end}}
+
+                    <a href="/connections/create"
+                        class="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-blue-400 hover:bg-blue-900/30 hover:text-blue-300 transition mt-4">
+                        <svg class="mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add New
+                    </a>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-gray-700">
+                <div class="text-xs text-gray-500 text-center">v0.1.0</div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-900 relative">
+            <div class="p-8">
+                {{embed}}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // NProgress Integration
+        NProgress.configure({ showSpinner: false });
+
+        // Trigger on click of any internal link
+        document.addEventListener('click', function (e) {
+            const anchor = e.target.closest('a');
+            if (anchor && anchor.href && anchor.href.startsWith(window.location.origin) && !anchor.hasAttribute('download') && anchor.target !== '_blank') {
+                NProgress.start();
+            }
+        });
+
+        // Trigger on form submit
+        document.addEventListener('submit', function () {
+            NProgress.start();
+        });
+
+        // Stop on page load (in case it was running from cached state)
+        window.addEventListener('load', function () {
+            NProgress.done();
+        });
+
+        // Also stop when pages show from bfcache
+        window.addEventListener('pageshow', function () {
+            NProgress.done();
+        });
+    </script>
+</body>
+
+</html>

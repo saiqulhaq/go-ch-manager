@@ -1,0 +1,188 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+
+<style>
+    .CodeMirror {
+        height: 16rem;
+        /* h-64 equivalent */
+        border-radius: 0.5rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.875rem;
+    }
+</style>
+
+<div class="max-w-6xl mx-auto">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-white">Compare Queries</h1>
+        <a href="/connections/{{.ConnectionID}}" class="text-gray-400 hover:text-white">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Before Query -->
+        <div class="flex flex-col">
+            <label class="mb-2 text-gray-400 text-sm font-semibold uppercase">Before Query</label>
+            <textarea id="query1" name="query1" placeholder="SELECT ..."></textarea>
+        </div>
+
+        <!-- After Query -->
+        <div class="flex flex-col">
+            <label class="mb-2 text-gray-400 text-sm font-semibold uppercase">After Query</label>
+            <textarea id="query2" name="query2" placeholder="SELECT ..."></textarea>
+        </div>
+    </div>
+
+    <div class="mb-8 text-center">
+        <button onclick="runComparison()" id="compare-btn"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105 flex items-center justify-center mx-auto gap-2">
+            <span>Run Comparison</span>
+            <svg id="btn-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </button>
+        <p id="error-msg" class="text-red-500 mt-4 hidden"></p>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="hidden">
+        <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">Comparison Results</h2>
+
+        <div class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+            <table class="w-full text-left">
+                <thead class="bg-gray-900 text-gray-400 text-xs uppercase font-medium">
+                    <tr>
+                        <th class="px-6 py-4">Metric</th>
+                        <th class="px-6 py-4 text-center">Before</th>
+                        <th class="px-6 py-4 text-center">After</th>
+                        <th class="px-6 py-4 text-right">Diff</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700 text-gray-300" id="results-body">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const connId = "{{.ConnectionID}}";
+
+    // Initialize CodeMirror
+    const editorConfig = {
+        mode: 'text/x-sql',
+        theme: 'dracula',
+        lineNumbers: true,
+        indentWithTabs: true,
+        smartIndent: true,
+        matchBrackets: true,
+        autofocus: true
+    };
+
+    const cm1 = CodeMirror.fromTextArea(document.getElementById("query1"), editorConfig);
+    const cm2 = CodeMirror.fromTextArea(document.getElementById("query2"), editorConfig);
+
+    function runComparison() {
+        // Save CodeMirror content to textareas to ensure we get the value
+        cm1.save();
+        cm2.save();
+
+        const q1 = cm1.getValue();
+        const q2 = cm2.getValue();
+
+        if (!q1 || !q2) {
+            $('#error-msg').text('Please enter both queries.').removeClass('hidden');
+            return;
+        }
+
+        $('#error-msg').addClass('hidden');
+        $('#compare-btn').prop('disabled', true).addClass('opacity-75 cursor-wait');
+        $('#btn-spinner').removeClass('hidden');
+        $('#results-section').addClass('hidden');
+
+        $.ajax({
+            url: `/api/v1/connections/${connId}/compare-query`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ query1: q1, query2: q2 }),
+            success: function (response) {
+                renderResults(response.data);
+                $('#results-section').removeClass('hidden');
+            },
+            error: function (err) {
+                $('#error-msg').text(`Error: ${err.responseJSON?.message || err.responseText}`).removeClass('hidden');
+            },
+            complete: function () {
+                $('#compare-btn').prop('disabled', false).removeClass('opacity-75 cursor-wait');
+                $('#btn-spinner').addClass('hidden');
+            }
+        });
+    }
+
+    function renderResults(data) {
+        const metrics = [
+            { key: 'execution_time_ms', label: 'Execution Time', unit: 'ms', invert: false },
+            { key: 'rows_read', label: 'Rows Read', unit: '', format: formatNumber, invert: false },
+            { key: 'bytes_read', label: 'Bytes Read', unit: 'B', format: formatBytes, invert: false },
+            { key: 'memory_peak', label: 'Memory Peak', unit: 'B', format: formatBytes, invert: false },
+            { key: 'parts_read', label: 'Parts Read', unit: '', format: formatNumber, invert: false }
+        ];
+
+        let html = '';
+        metrics.forEach(m => {
+            const v1 = data.query1_stats[m.key] || 0;
+            const v2 = data.query2_stats[m.key] || 0;
+
+            const diff = v2 - v1;
+            const diffPercent = v1 === 0 ? (v2 === 0 ? 0 : 100) : ((diff / v1) * 100).toFixed(1);
+
+            let diffColor = 'text-gray-400';
+            let arrow = '';
+
+            // Lower is usually better for these metrics
+            if (diff < 0) {
+                diffColor = 'text-green-400';
+                arrow = '↓';
+            } else if (diff > 0) {
+                diffColor = 'text-red-400';
+                arrow = '↑';
+            }
+
+            const val1 = m.format ? m.format(v1) : (v1 + (m.unit ? ' ' + m.unit : ''));
+            const val2 = m.format ? m.format(v2) : (v2 + (m.unit ? ' ' + m.unit : ''));
+
+            html += `
+                <tr class="hover:bg-gray-750 transition">
+                    <td class="px-6 py-4 font-medium text-white">${m.label}</td>
+                    <td class="px-6 py-4 text-center font-mono text-sm text-gray-400">${val1}</td>
+                    <td class="px-6 py-4 text-center font-mono text-sm text-white font-bold">${val2}</td>
+                    <td class="px-6 py-4 text-right font-mono text-sm ${diffColor}">
+                        ${arrow} ${Math.abs(diffPercent)}% <span class="text-xs text-gray-500">(${diff > 0 ? '+' : ''}${m.format ? m.format(diff) : diff})</span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        $('#results-body').html(html);
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        if (Math.abs(bytes) === 0) return '0 B'; // handle 0 diff
+
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
+        const val = (bytes / Math.pow(k, i)).toFixed(2);
+        return val + ' ' + sizes[i];
+    }
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+</script>
