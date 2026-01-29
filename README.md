@@ -44,12 +44,16 @@ git clone https://github.com/rahmatrdn/go-ch-manager.git
 ```sh
 cp .env.example .env
 ```
-3. Adjust the `.env` file according to the configuration in your local environment, such as the database, or other settings 
-7. Start the Application Service
+3. Adjust the `.env` file according to the configuration in your local environment, such as the database, ClickHouse settings, and other configurations
+4. Install dependencies
+```sh
+go mod download
+```
+5. Start the Application Service
 ```sh
 go run cmd/app/main.go
 ```
-8. Open `http://localhost:7011` in your browser
+6. Open `http://localhost:7011` in your browser
 
 
 ### Unit test
