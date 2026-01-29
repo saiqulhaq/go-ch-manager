@@ -128,7 +128,7 @@ The built application will be located in `cmd/desktop/build/bin/`.
    ```sh
    # macOS
    cd cmd/desktop/build/bin
-   zip -r "Go-CH-Manager-macOS.zip" "Go CH Manager.app"
+   zip -r "Go-CH-Manager-macOS.zip" go-ch-manager.app
 
    # Windows - share the .exe file directly
    # Linux - share the binary directly
