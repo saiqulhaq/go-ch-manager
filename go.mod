@@ -48,7 +48,7 @@ require (
 	github.com/go-openapi/swag v0.22.4 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/gofiber/template v1.8.3 // indirect
-	github.com/gofiber/utils v1.1.0 // indirect
+	github.com/gofiber/utils v1.2.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
