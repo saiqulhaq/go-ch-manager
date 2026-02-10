@@ -54,3 +54,19 @@ type CompareResult struct {
 	Query1Stats *QueryStats `json:"query1_stats"`
 	Query2Stats *QueryStats `json:"query2_stats"`
 }
+
+type TableSchemaInfo struct {
+	Database   string `json:"database"`
+	TableName  string `json:"table_name"`
+	CreateSQL  string `json:"create_sql"`
+	HasWarning bool   `json:"has_warning"`
+}
+
+type QueryAnalysis struct {
+	Query        string            `json:"query"`
+	Tables       []TableSchemaInfo `json:"tables"`
+	ExplainPlan  string            `json:"explain_plan"`
+	QueryStats   *QueryStats       `json:"query_stats"`
+	AnalysisText string            `json:"analysis_text"`
+	Warnings     []string          `json:"warnings"`
+}

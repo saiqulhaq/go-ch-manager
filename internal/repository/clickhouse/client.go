@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,6 +22,7 @@ type ClickHouseClient interface {
 	GetCreateSQL(ctx context.Context, conn *entity.CHConnection, tableName string) (string, error)
 	GetServerInfo(ctx context.Context, conn *entity.CHConnection) (string, error)
 	GetSchema(ctx context.Context, conn *entity.CHConnection, tableName string) (*entity.TableSchema, error)
+	ExplainQuery(ctx context.Context, conn *entity.CHConnection, query string) (string, error)
 	ExecuteQueryWithStats(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryStats, error)
 	ExecuteQueryWithResults(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryResult, error)
 
@@ -271,6 +273,38 @@ func (c *clientImpl) GetSchema(ctx context.Context, conn *entity.CHConnection, t
 	}
 
 	return schema, nil
+}
+
+func (c *clientImpl) ExplainQuery(ctx context.Context, conn *entity.CHConnection, query string) (string, error) {
+	db, err := c.getConnection(conn)
+	if err != nil {
+		return "", err
+	}
+
+	// Use EXPLAIN PLAN to get the query execution plan
+	explainQuery := "EXPLAIN PLAN " + query
+
+	rows, err := db.Query(ctx, explainQuery)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+
+	var explainBuilder strings.Builder
+	for rows.Next() {
+		var line string
+		if err := rows.Scan(&line); err != nil {
+			return "", err
+		}
+		explainBuilder.WriteString(line)
+		explainBuilder.WriteString("\n")
+	}
+
+	if explainBuilder.String() == "" {
+		return "", fmt.Errorf("explain query returned no results")
+	}
+
+	return explainBuilder.String(), nil
 }
 
 func (c *clientImpl) ExecuteQueryWithStats(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryStats, error) {
