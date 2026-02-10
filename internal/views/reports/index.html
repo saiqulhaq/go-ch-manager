@@ -42,6 +42,22 @@
             </div>
 
             <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <label for="query-kind-filter" class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</label>
+                    <select id="query-kind-filter"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors">
+                        <option value="all" {{if eq .QueryKind "all"}}selected{{end}}>All Queries</option>
+                        <option value="Select" {{if eq .QueryKind "Select"}}selected{{end}}>Select</option>
+                        <option value="Insert" {{if eq .QueryKind "Insert"}}selected{{end}}>Insert</option>
+                        <option value="Query" {{if eq .QueryKind "Query"}}selected{{end}}>Query</option>
+                        <option value="Alter" {{if eq .QueryKind "Alter"}}selected{{end}}>Alter</option>
+                        <option value="Create" {{if eq .QueryKind "Create"}}selected{{end}}>Create</option>
+                        <option value="Drop" {{if eq .QueryKind "Drop"}}selected{{end}}>Drop</option>
+                        <option value="Optimize" {{if eq .QueryKind "Optimize"}}selected{{end}}>Optimize</option>
+                        <option value="Truncate" {{if eq .QueryKind "Truncate"}}selected{{end}}>Truncate</option>
+                        <option value="System" {{if eq .QueryKind "System"}}selected{{end}}>System</option>
+                    </select>
+                </div>
                 <div class="text-sm text-gray-500 dark:text-slate-400" id="last-updated-text">
                     {{if .LastRefresh}}
                     Last updated: {{.LastRefresh.Format "02 Jan 2006 15:04:05"}}
@@ -64,6 +80,9 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                 <thead class="bg-gray-50 dark:bg-slate-800/50">
                     <tr>
+                        <th scope="col"
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                            Query Kind</th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                             Executed By</th>
@@ -112,7 +131,14 @@
                             Query Details (Sample)
                         </h3>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+                            <div class="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">
+                                <span
+                                    class="block text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Query
+                                    Kind</span>
+                                <span class="block text-sm font-medium text-gray-900 dark:text-white mt-1"
+                                    id="modal-query-kind">-</span>
+                            </div>
                             <div class="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">
                                 <span
                                     class="block text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Executed
@@ -198,6 +224,23 @@
         console.error("Init data error", e);
     }
 
+    function getQueryKindBadge(queryKind) {
+        const colors = {
+            'Select': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+            'Insert': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+            'Query': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+            'Alter': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+            'Create': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+            'Drop': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+            'Optimize': 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
+            'Truncate': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+            'System': 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+        };
+        const defaultColor = 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+        const colorClass = colors[queryKind] || defaultColor;
+        return `<span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${colorClass}">${queryKind || 'Unknown'}</span>`;
+    }
+
     function renderTable() {
         const tableBody = $('#reports-table-body');
         tableBody.empty();
@@ -205,7 +248,7 @@
         if (!reportsData || reportsData.length === 0) {
             tableBody.append(`
                 <tr>
-                    <td colspan="7" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-slate-400 min-h-[200px] flex flex-col justify-center items-center h-full w-full">
+                    <td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-slate-400 min-h-[200px] flex flex-col justify-center items-center h-full w-full">
                         No slow queries found in the last 24 hours.
                     </td>
                 </tr>
@@ -214,14 +257,18 @@
         }
 
         reportsData.forEach((item, index) => {
+            const queryKindBadge = getQueryKindBadge(item.query_kind);
             const row = `
                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${queryKindBadge}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                         ${item.executed_by}
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-500 dark:text-slate-400 font-mono">
-                        <div class="max-w-xl truncate cursor-pointer hover:text-amber-500 view-query-btn" 
-                             title="Click to view full query" 
+                        <div class="max-w-xl truncate cursor-pointer hover:text-amber-500 view-query-btn"
+                             title="Click to view full query"
                              data-index="${index}">
                             ${item.query_normalized}
                         </div>
@@ -255,6 +302,7 @@
         if (!item) return;
 
         currentQuery = item.sample_query || item.query_normalized;
+        $('#modal-query-kind').html(getQueryKindBadge(item.query_kind));
         $('#modal-executed-by').text(item.executed_by);
         $('#modal-executions').text(formatNumber(item.executions));
         $('#modal-avg-duration').text(formatNumber(item.avg_duration_ms) + ' ms');
@@ -302,9 +350,54 @@
         return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
     }
 
-    $(document).ready(function () {
+    function loadData(refresh = false) {
         const connectionID = $('#reports-container').data('connection-id');
+        const queryKind = $('#query-kind-filter').val();
+        const lastUpdatedText = $('#last-updated-text');
+        const btn = $('#refresh-btn');
+        const icon = $('#refresh-icon');
+        const label = $('#refresh-label');
 
+        if (refresh) {
+            btn.prop('disabled', true);
+            icon.addClass('animate-spin');
+            label.text('Refreshing...');
+            NProgress.start();
+        }
+
+        $.ajax({
+            url: `/connections/${connectionID}/reports/slow-queries`,
+            method: 'GET',
+            data: { refresh: refresh, queryKind: queryKind, format: 'json' },
+            dataType: 'json',
+            success: function (response) {
+                if (response.last_refresh) {
+                    const date = new Date(response.last_refresh);
+                    const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + date.toLocaleTimeString('en-GB', { hour12: false });
+                    lastUpdatedText.text(`Last updated: ${dateStr}`);
+                }
+
+                if (response.data) {
+                    reportsData = response.data;
+                    renderTable();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error loading data:", error);
+                alert("Failed to load data. Please try again.");
+            },
+            complete: function () {
+                if (refresh) {
+                    btn.prop('disabled', false);
+                    icon.removeClass('animate-spin');
+                    label.text('Refresh Data');
+                    NProgress.done();
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
         // Initial render
         renderTable();
 
@@ -314,46 +407,13 @@
             openModal(index);
         });
 
+        // Query kind filter change event
+        $('#query-kind-filter').change(function () {
+            loadData(true);
+        });
+
         $('#refresh-btn').click(function () {
-            const btn = $(this);
-            const icon = $('#refresh-icon');
-            const label = $('#refresh-label');
-            const lastUpdatedText = $('#last-updated-text');
-
-            // Loading state
-            btn.prop('disabled', true);
-            icon.addClass('animate-spin');
-            label.text('Refreshing...');
-            NProgress.start();
-
-            $.ajax({
-                url: `/connections/${connectionID}/reports/slow-queries`,
-                method: 'GET',
-                data: { refresh: 'true', format: 'json' },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.last_refresh) {
-                        const date = new Date(response.last_refresh);
-                        const dateStr = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + date.toLocaleTimeString('en-GB', { hour12: false });
-                        lastUpdatedText.text(`Last updated: ${dateStr}`);
-                    }
-
-                    if (response.data) {
-                        reportsData = response.data;
-                        renderTable();
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Error refreshing data:", error);
-                    alert("Failed to refresh data. Please try again.");
-                },
-                complete: function () {
-                    btn.prop('disabled', false);
-                    icon.removeClass('animate-spin');
-                    label.text('Refresh Data');
-                    NProgress.done();
-                }
-            });
+            loadData(true);
         });
     });
 </script>

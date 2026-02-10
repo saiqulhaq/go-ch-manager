@@ -47,7 +47,7 @@ func init() {
 // @in							header
 // @name						Authorization
 // @license.url 				http://www.apache.org/licenses/LICENSE-2.0.html
-// @host 						localhost:7011
+// @host 						localhost:7012
 // @BasePath /
 func main() {
 	// Initialize config variable from .env file
