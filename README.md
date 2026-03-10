@@ -19,7 +19,6 @@ Goals
 - ClickHouse
 - Go Fiber
 - SQLite
-- Wails v2 (Desktop App)
 
 ## Contact
 | Name                   | Email                        | Role    |
@@ -85,73 +84,29 @@ docker-compose -f docker-compose.yaml up -d
 ```
 
 
-## Desktop App
+## Fiber Web App Bundles
 
-The desktop app provides a native experience for macOS, Windows, and Linux using [Wails](https://wails.io/).
+The project now distributes a Fiber web UI bundle for macOS, Windows, and Linux.
+Each bundle contains:
+- server binary (`Go CH Manager Server` / `Go CH Manager Server.exe`)
+- view templates (`internal/views`)
+- launcher script (`Start Go CH Manager.bat` or `start-go-ch-manager.sh`)
 
-### Prerequisites
-- Go 1.24+
-- Wails CLI v2
-- Platform-specific requirements:
-  - **macOS**: Xcode Command Line Tools (`xcode-select --install`)
-  - **Windows**: WebView2 (usually pre-installed on Windows 10/11)
-  - **Linux**: `gtk3`, `webkit2gtk` (see [Wails Linux Guide](https://wails.io/docs/gettingstarted/installation#linux))
+### Local Development
 
-### Install Wails CLI
+Run the web app directly:
 ```sh
-go install github.com/wailsapp/wails/v2/cmd/wails@latest
-wails doctor  # Verify installation
+go run ./cmd/app
 ```
 
-### Development Mode
-Run the desktop app with hot-reload:
-```sh
-make desktop-dev
+Open:
+```text
+http://127.0.0.1:8760/
 ```
-
-### Building for Distribution
-
-**Build for current platform:**
-```sh
-make desktop-build
-```
-
-**Build for specific platforms:**
-```sh
-# macOS (Universal binary - Intel & Apple Silicon)
-make desktop-build-darwin
-
-# Windows
-make desktop-build-windows
-
-# Linux
-make desktop-build-linux
-```
-
-The built application will be located in `cmd/desktop/build/bin/`.
-
-### Distributing to Others
-
-1. Build the app for the target platform
-2. Compress the output:
-   ```sh
-   # macOS
-   cd cmd/desktop/build/bin
-   zip -r "Go-CH-Manager-macOS.zip" go-ch-manager.app
-
-   # Windows - share the .exe file directly
-   # Linux - share the binary directly
-   ```
-3. Share via file sharing service (Google Drive, Dropbox, etc.)
-
-**Note for macOS users:** Since the app is not signed with an Apple Developer certificate, recipients need to:
-1. Right-click the app and select "Open"
-2. Click "Open" in the security dialog
-3. Or go to System Settings > Privacy & Security and click "Open Anyway"
 
 ### Automated Builds (GitHub Actions)
 
-The repository includes a GitHub Actions workflow that automatically builds the desktop app for all platforms.
+The repository includes a workflow that builds Fiber bundles for all target OS.
 
 **Trigger a release build:**
 ```sh
@@ -160,10 +115,10 @@ git push origin v1.0.0
 ```
 
 This will:
-1. Build for macOS (Universal), Windows (amd64), and Linux (amd64)
-2. Create a GitHub Release with all binaries attached
+1. Build bundle artifacts for macOS, Windows, and Linux
+2. Create a GitHub Release with all bundle files attached
 
-**Manual trigger:** You can also trigger builds manually from the Actions tab using "workflow_dispatch".
+**Manual trigger:** You can also trigger builds manually from the Actions tab using `workflow_dispatch`.
 
 
 ## Contributing
