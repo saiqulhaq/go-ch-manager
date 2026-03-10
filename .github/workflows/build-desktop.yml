@@ -53,9 +53,24 @@ jobs:
           setlocal
           cd /d "%~dp0"
           set API_PORT=:8760
-          start "Go CH Manager Server" "%~dp0Go CH Manager Server.exe"
+
+          if not exist "%~dp0Go CH Manager Server.exe" (
+            powershell -NoProfile -Command "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Go CH Manager Server.exe is missing from this folder. Please re-extract the artifact.', 'Go CH Manager')" >nul 2>&1
+            echo [ERROR] Go CH Manager Server.exe is missing from this folder.
+            pause
+            exit /b 1
+          )
+
+          start "Go CH Manager Server" /min "%~dp0Go CH Manager Server.exe"
           timeout /t 2 /nobreak >nul
-          start "Go CH Manager UI" "http://127.0.0.1:8760/connections/create"
+
+          REM Open in app-window (webview-like UX) when Edge is available.
+          where msedge >nul 2>&1
+          if %errorlevel%==0 (
+            start "Go CH Manager" msedge --new-window --app="http://127.0.0.1:8760/"
+          ) else (
+            start "Go CH Manager UI" "http://127.0.0.1:8760/"
+          )
           EOF
 
       - name: Create Unix Launcher
@@ -65,9 +80,60 @@ jobs:
           cat > dist/bundle/start-go-ch-manager.sh << 'EOF'
           #!/usr/bin/env sh
           set -eu
+
+          show_alert() {
+            msg="$1"
+            if [ "$(uname -s)" = "Darwin" ] && command -v osascript >/dev/null 2>&1; then
+              osascript -e "display alert \"Go CH Manager\" message \"${msg}\"" >/dev/null 2>&1 || true
+            elif command -v zenity >/dev/null 2>&1; then
+              zenity --error --title="Go CH Manager" --text="$msg" >/dev/null 2>&1 || true
+            elif command -v kdialog >/dev/null 2>&1; then
+              kdialog --error "$msg" --title "Go CH Manager" >/dev/null 2>&1 || true
+            fi
+            printf "[ERROR] %s\n" "$msg" >&2
+          }
+
           cd "$(dirname "$0")"
           export API_PORT=:8760
-          ./"Go CH Manager Server"
+
+          if [ ! -x "./Go CH Manager Server" ]; then
+            show_alert "Go CH Manager Server is missing or not executable. Please re-extract the artifact."
+            exit 1
+          fi
+
+          URL="http://127.0.0.1:8760/"
+
+          # Open app-like window after server boots.
+          (
+            sleep 2
+            OS_NAME="$(uname -s)"
+
+            if [ "$OS_NAME" = "Darwin" ]; then
+              if [ -d "/Applications/Microsoft Edge.app" ]; then
+                open -na "Microsoft Edge" --args --new-window --app="$URL" >/dev/null 2>&1 || open "$URL" >/dev/null 2>&1
+              elif [ -d "/Applications/Google Chrome.app" ]; then
+                open -na "Google Chrome" --args --new-window --app="$URL" >/dev/null 2>&1 || open "$URL" >/dev/null 2>&1
+              else
+                open "$URL" >/dev/null 2>&1
+              fi
+            else
+              if command -v microsoft-edge >/dev/null 2>&1; then
+                microsoft-edge --new-window --app="$URL" >/dev/null 2>&1 &
+              elif command -v google-chrome >/dev/null 2>&1; then
+                google-chrome --new-window --app="$URL" >/dev/null 2>&1 &
+              elif command -v chromium >/dev/null 2>&1; then
+                chromium --new-window --app="$URL" >/dev/null 2>&1 &
+              elif command -v chromium-browser >/dev/null 2>&1; then
+                chromium-browser --new-window --app="$URL" >/dev/null 2>&1 &
+              elif command -v xdg-open >/dev/null 2>&1; then
+                xdg-open "$URL" >/dev/null 2>&1 &
+              else
+                show_alert "No supported browser launcher found. Install Edge/Chrome/Chromium or xdg-open to open the UI automatically."
+              fi
+            fi
+          ) &
+
+          exec ./"Go CH Manager Server"
           EOF
           chmod +x dist/bundle/start-go-ch-manager.sh
 
