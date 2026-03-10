@@ -4,7 +4,7 @@ services:
     container_name: go-ch-manager-app
     image: go-ch-manager-app:1.0.1
     ports:
-      - 8760:7011
+      - 8760:7012
     env_file:
       - ./.env
     network_mode: bridge

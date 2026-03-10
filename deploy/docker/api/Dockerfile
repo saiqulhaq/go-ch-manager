@@ -28,7 +28,7 @@ COPY --from=builder /app/deploy/api .
 ADD https://github.com/golang/go/raw/master/lib/time/zoneinfo.zip /zoneinfo.zip
 ENV ZONEINFO /zoneinfo.zip
 
-EXPOSE 7011
+EXPOSE 7012
 
 #we tell docker what to run when this image is run and run it as executable.
 ENTRYPOINT ["/api"]

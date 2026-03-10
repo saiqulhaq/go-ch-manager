@@ -87,24 +87,25 @@
                         <span class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></span>
                         Input Query
                     </label>
-                    <button id="run-query-btn"
-                        class="group flex items-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-5 py-2 rounded-lg font-bold transition-all hover:scale-105 shadow-lg shadow-primary-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Execute Query
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button id="run-query-btn"
+                            class="group flex items-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-5 py-2 rounded-lg font-bold transition-all hover:scale-105 shadow-lg shadow-primary-500/30">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Execute Query
+                        </button>
+                    </div>
                 </div>
 
                 <div
                     class="relative shadow-inner rounded-xl overflow-hidden ring-1 ring-white/10 group-hover:ring-primary-500/30 transition-all">
-                    <textarea id="query-input"
-                        placeholder="SELECT * FROM system.tables LIMIT 10">SELECT * FROM system.tables LIMIT 50</textarea>
+                    <textarea id="query-input" placeholder="Paste your amazing query here..."></textarea>
                 </div>
 
                 <div id="query-error"
@@ -133,9 +134,18 @@
     </div>
 
     <div id="results-area" class="hidden animate-fade-in-up">
-        <div class="flex items-center gap-3 mb-6">
+        <div class="flex items-center gap-3 mb-6 ">
             <h2 class="text-xl font-bold text-white">Results</h2>
             <div class="h-px bg-gray-800 flex-1"></div>
+            <button id="analyze-query-btn"
+                class="hidden group flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg font-medium transition-all hover:scale-105 shadow-lg shadow-purple-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <span>Analyze with AI</span>
+            </button>
         </div>
 
         <!-- Stats Bar -->
@@ -197,6 +207,76 @@
     </div>
 </div>
 
+<!-- Analyze with AI Modal -->
+<div id="analyze-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeAnalyzeModal()"></div>
+
+    <!-- Modal Content -->
+    <div
+        class="relative glass bg-gray-900 rounded-2xl border border-white/10 shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col animate-fade-in-up">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Analyze with AI</h3>
+                    <p class="text-sm text-gray-400">Copy this analysis prompt to your favourite AI 🤩</p>
+                </div>
+            </div>
+            <button onclick="closeAnalyzeModal()"
+                class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="analyze-loading" class="flex-1 flex items-center justify-center p-12">
+            <div class="text-center">
+                <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-purple-500 blur-xl opacity-20 animate-pulse"></div>
+                    <div
+                        class="relative inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-700 border-t-purple-500 mb-4">
+                    </div>
+                </div>
+                <p class="text-gray-400 text-sm font-medium">Fetching table schemas...</p>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div id="analyze-content" class="hidden flex-1 flex flex-col overflow-hidden">
+            <div class="p-6 flex-1 overflow-y-auto custom-scrollbar">
+                <pre id="analyze-text"
+                    class="text-sm text-gray-300 font-mono whitespace-pre-wrap break-words bg-black/30 rounded-xl p-4 border border-white/5"></pre>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 border-t border-white/10 flex items-center justify-between">
+                <div id="analyze-info" class="text-sm text-gray-400"></div>
+                <button id="copy-analyze-btn" onclick="copyAnalysisText()"
+                    class="flex items-center gap-2 bg-primary-600 hover:bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium transition-all hover:scale-105 shadow-lg shadow-primary-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>Copy to Clipboard</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     @keyframes fadeInUp {
         from {
@@ -228,6 +308,22 @@
             opacity: 1;
             transform: translateY(0);
         }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease-out forwards;
     }
 
     .custom-scrollbar::-webkit-scrollbar {
@@ -263,6 +359,17 @@
         // Initial load
         loadHistory();
 
+        // Analyze with AI button
+        $('#analyze-query-btn').click(function () {
+            editor.save();
+            const query = editor.getValue().trim();
+            if (!query) {
+                alert('Please enter a query to analyze');
+                return;
+            }
+            openAnalyzeModal(query);
+        });
+
         $('#run-query-btn').click(function () {
             editor.save();
             const query = editor.getValue().trim();
@@ -293,6 +400,9 @@
                     $('#loading-indicator').addClass('hidden');
                     renderResults(response.data);
 
+                    // Show analyze button after successful query execution
+                    $('#analyze-query-btn').removeClass('hidden');
+
                     // Reload history on success
                     loadHistory();
 
@@ -321,6 +431,39 @@
             });
         });
     });
+
+    function showNotification(message) {
+        // Create notification element
+        const notification = $(`
+            <div id="claude-notification" class="fixed top-6 right-6 z-50 animate-slide-in">
+                <div class="glass bg-gradient-to-r from-purple-900/80 to-pink-900/80 border border-purple-500/30 rounded-xl px-6 py-4 shadow-2xl flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium">${message}</p>
+                        <p class="text-purple-200 text-sm mt-1">Open terminal and paste (Cmd+V / Ctrl+V)</p>
+                    </div>
+                    <button onclick="$('#claude-notification').remove()" class="ml-4 text-purple-200 hover:text-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `);
+
+        $('body').append(notification);
+
+        // Auto remove after 5 seconds
+        setTimeout(function () {
+            notification.fadeOut(300, function () {
+                notification.remove();
+            });
+        }, 5000);
+    }
 
     function loadHistory() {
         $.ajax({
@@ -452,4 +595,70 @@
         // Optional: Auto run?
         // $('#run-query-btn').click();
     }
+
+    // Analyze Modal Functions
+    function openAnalyzeModal(query) {
+        $('#analyze-modal').removeClass('hidden');
+        $('#analyze-loading').removeClass('hidden');
+        $('#analyze-content').addClass('hidden');
+
+        $.ajax({
+            url: `/api/v1/connections/${connId}/analyze-query`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ query: query }),
+            success: function (response) {
+                $('#analyze-loading').addClass('hidden');
+                $('#analyze-content').removeClass('hidden');
+
+                const data = response.data;
+                $('#analyze-text').text(data.analysis_text);
+
+                // Update info text with warnings if any
+                let infoText = `${data.tables.length} table(s) found`;
+                if (data.warnings && data.warnings.length > 0) {
+                    infoText += ` • ⚠️ ${data.warnings.length} warning(s)`;
+                    $('#analyze-info').addClass('text-yellow-400').removeClass('text-gray-400');
+                } else {
+                    $('#analyze-info').removeClass('text-yellow-400').addClass('text-gray-400');
+                }
+                $('#analyze-info').text(infoText);
+            },
+            error: function (err) {
+                $('#analyze-loading').addClass('hidden');
+                const msg = err.responseJSON?.message || err.responseText || "Failed to analyze query";
+                $('#analyze-text').text(`Error: ${msg}`);
+                $('#analyze-info').text('Analysis failed');
+                $('#analyze-info').removeClass('text-yellow-400').addClass('text-gray-400');
+                $('#analyze-content').removeClass('hidden');
+            }
+        });
+    }
+
+    function closeAnalyzeModal() {
+        $('#analyze-modal').addClass('hidden');
+    }
+
+    function copyAnalysisText() {
+        const text = $('#analyze-text').text();
+        navigator.clipboard.writeText(text).then(function () {
+            const btn = $('#copy-analyze-btn');
+            const originalHtml = btn.html();
+            btn.html('<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span>Copied!</span>');
+            btn.removeClass('bg-primary-600 hover:bg-primary-500').addClass('bg-green-600');
+            setTimeout(function () {
+                btn.html(originalHtml);
+                btn.removeClass('bg-green-600').addClass('bg-primary-600 hover:bg-primary-500');
+            }, 2000);
+        }).catch(function () {
+            alert('Failed to copy to clipboard');
+        });
+    }
+
+    // Close modal on Escape key
+    $(document).keydown(function (e) {
+        if (e.key === 'Escape' && !$('#analyze-modal').hasClass('hidden')) {
+            closeAnalyzeModal();
+        }
+    });
 </script>

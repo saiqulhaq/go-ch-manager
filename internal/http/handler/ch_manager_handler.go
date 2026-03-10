@@ -36,6 +36,7 @@ func (h *ConnectionHandler) Register(api fiber.Router) {
 	connections.Post("/:id/compare-query", h.CompareQueries)
 	connections.Get("/:id/history", h.GetConnectionHistory)
 	connections.Post("/:id/query", h.HandleExecuteQuery)
+	connections.Post("/:id/analyze-query", h.AnalyzeQuery)
 }
 
 func (h *ConnectionHandler) CreateConnection(c *fiber.Ctx) error {
@@ -150,6 +151,21 @@ func (h *ConnectionHandler) HandleExecuteQuery(c *fiber.Ctx) error {
 	}
 
 	return h.presenter.BuildSuccess(c, result, "Query Executed", 200)
+}
+
+func (h *ConnectionHandler) AnalyzeQuery(c *fiber.Ctx) error {
+	id, _ := strconv.ParseInt(c.Params("id"), 10, 64)
+	var req ExecuteQueryRequest
+	if err := c.BodyParser(&req); err != nil {
+		return h.presenter.BuildError(c, err)
+	}
+
+	result, err := h.usecase.AnalyzeQuery(c.Context(), id, req.Query)
+	if err != nil {
+		return h.presenter.BuildError(c, err)
+	}
+
+	return h.presenter.BuildSuccess(c, result, "Analysis Generated", 200)
 }
 
 func (h *ConnectionHandler) GetConnectionHistory(c *fiber.Ctx) error {
