@@ -11,7 +11,7 @@ import (
 )
 
 type ReportUsecase interface {
-	GetTopSlowQueries(ctx context.Context, connectionID int64, forceRefresh bool) ([]*entity.SlowQueryReport, *time.Time, error)
+	GetTopSlowQueries(ctx context.Context, connectionID int64, queryKind string, forceRefresh bool) ([]*entity.SlowQueryReport, *time.Time, error)
 }
 
 type reportUsecase struct {
@@ -32,7 +32,7 @@ func NewReportUsecase(
 	}
 }
 
-func (u *reportUsecase) GetTopSlowQueries(ctx context.Context, connectionID int64, forceRefresh bool) ([]*entity.SlowQueryReport, *time.Time, error) {
+func (u *reportUsecase) GetTopSlowQueries(ctx context.Context, connectionID int64, queryKind string, forceRefresh bool) ([]*entity.SlowQueryReport, *time.Time, error) {
 	// 1. Check SQLite if not forceRefresh
 	if !forceRefresh {
 		existing, err := u.reportRepo.GetSlowQueryReports(ctx, connectionID)
@@ -60,8 +60,9 @@ func (u *reportUsecase) GetTopSlowQueries(ctx context.Context, connectionID int6
 	// 3. Execute Query on ClickHouse
 	query := `
 SELECT
+    query_kind                                 AS query_kind,
     initial_user                               AS executed_by,
-    any(query)                             AS sample_query,
+    any(query)                                 AS sample_query,
     normalizeQuery(query)                      AS query_normalized,
     count()                                    AS executions,
     round(avg(query_duration_ms), 2)           AS avg_duration_ms,
@@ -73,9 +74,16 @@ FROM system.query_log
 WHERE
     event_time >= now() - INTERVAL 24 HOUR
     AND type = 'QueryFinish'
-    AND query_kind = 'Select'
-    AND is_initial_query = 1
+    AND is_initial_query = 1`
+
+	// Add query kind filter if specified
+	if queryKind != "" && queryKind != "all" {
+		query += fmt.Sprintf("\n    AND query_kind = '%s'", queryKind)
+	}
+
+	query += `
 GROUP BY
+    query_kind,
     executed_by,
     query_normalized
 ORDER BY max_duration_ms DESC
@@ -95,6 +103,7 @@ LIMIT 20;
 	for _, row := range res.Rows {
 		report := &entity.SlowQueryReport{
 			ConnectionID:    connectionID,
+			QueryKind:       getString(row["query_kind"]),
 			ExecutedBy:      getString(row["executed_by"]),
 			SampleQuery:     getString(row["sample_query"]),
 			QueryNormalized: getString(row["query_normalized"]),

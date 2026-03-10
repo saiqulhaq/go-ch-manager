@@ -32,8 +32,9 @@ func (h *ReportHandler) GetSlowQueries(c *fiber.Ctx) error {
 	}
 
 	refresh := c.Query("refresh") == "true"
+	queryKind := c.Query("queryKind", "all")
 
-	reports, lastRefresh, err := h.reportUsecase.GetTopSlowQueries(c.Context(), connectionID, refresh)
+	reports, lastRefresh, err := h.reportUsecase.GetTopSlowQueries(c.Context(), connectionID, queryKind, refresh)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString(err.Error())
 	}
@@ -58,6 +59,7 @@ func (h *ReportHandler) GetSlowQueries(c *fiber.Ctx) error {
 		"Reports":            string(reportsJSON),
 		"ConnectionID":       connectionID,
 		"LastRefresh":        lastRefresh,
+		"QueryKind":          queryKind,
 		"ActiveMenu":         " reports",
 		"SidebarConnections": connections,
 	}, "layouts/main")

@@ -8,6 +8,7 @@ import (
 type SlowQueryReport struct {
 	ID              int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	ConnectionID    int64     `gorm:"index" json:"connection_id"`
+	QueryKind       string    `json:"query_kind"`
 	ExecutedBy      string    `json:"executed_by"`
 	SampleQuery     string    `json:"sample_query"`
 	QueryNormalized string    `json:"query_normalized"`

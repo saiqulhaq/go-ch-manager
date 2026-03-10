@@ -38,6 +38,80 @@ func (_m *ClickHouseClient) EXPECT() *ClickHouseClient_Expecter {
 	return &ClickHouseClient_Expecter{mock: &_m.Mock}
 }
 
+// ExecuteQueryWithResults provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) ExecuteQueryWithResults(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryResult, error) {
+	ret := _mock.Called(ctx, conn, query)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExecuteQueryWithResults")
+	}
+
+	var r0 *entity.QueryResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection, string) (*entity.QueryResult, error)); ok {
+		return returnFunc(ctx, conn, query)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection, string) *entity.QueryResult); ok {
+		r0 = returnFunc(ctx, conn, query)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.QueryResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection, string) error); ok {
+		r1 = returnFunc(ctx, conn, query)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_ExecuteQueryWithResults_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExecuteQueryWithResults'
+type ClickHouseClient_ExecuteQueryWithResults_Call struct {
+	*mock.Call
+}
+
+// ExecuteQueryWithResults is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+//   - query string
+func (_e *ClickHouseClient_Expecter) ExecuteQueryWithResults(ctx interface{}, conn interface{}, query interface{}) *ClickHouseClient_ExecuteQueryWithResults_Call {
+	return &ClickHouseClient_ExecuteQueryWithResults_Call{Call: _e.mock.On("ExecuteQueryWithResults", ctx, conn, query)}
+}
+
+func (_c *ClickHouseClient_ExecuteQueryWithResults_Call) Run(run func(ctx context.Context, conn *entity.CHConnection, query string)) *ClickHouseClient_ExecuteQueryWithResults_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_ExecuteQueryWithResults_Call) Return(queryResult *entity.QueryResult, err error) *ClickHouseClient_ExecuteQueryWithResults_Call {
+	_c.Call.Return(queryResult, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_ExecuteQueryWithResults_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryResult, error)) *ClickHouseClient_ExecuteQueryWithResults_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ExecuteQueryWithStats provides a mock function for the type ClickHouseClient
 func (_mock *ClickHouseClient) ExecuteQueryWithStats(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryStats, error) {
 	ret := _mock.Called(ctx, conn, query)
@@ -108,6 +182,146 @@ func (_c *ClickHouseClient_ExecuteQueryWithStats_Call) Return(queryStats *entity
 }
 
 func (_c *ClickHouseClient_ExecuteQueryWithStats_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection, query string) (*entity.QueryStats, error)) *ClickHouseClient_ExecuteQueryWithStats_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ExplainQuery provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) ExplainQuery(ctx context.Context, conn *entity.CHConnection, query string) (string, error) {
+	ret := _mock.Called(ctx, conn, query)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ExplainQuery")
+	}
+
+	var r0 string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection, string) (string, error)); ok {
+		return returnFunc(ctx, conn, query)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection, string) string); ok {
+		r0 = returnFunc(ctx, conn, query)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection, string) error); ok {
+		r1 = returnFunc(ctx, conn, query)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_ExplainQuery_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ExplainQuery'
+type ClickHouseClient_ExplainQuery_Call struct {
+	*mock.Call
+}
+
+// ExplainQuery is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+//   - query string
+func (_e *ClickHouseClient_Expecter) ExplainQuery(ctx interface{}, conn interface{}, query interface{}) *ClickHouseClient_ExplainQuery_Call {
+	return &ClickHouseClient_ExplainQuery_Call{Call: _e.mock.On("ExplainQuery", ctx, conn, query)}
+}
+
+func (_c *ClickHouseClient_ExplainQuery_Call) Run(run func(ctx context.Context, conn *entity.CHConnection, query string)) *ClickHouseClient_ExplainQuery_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_ExplainQuery_Call) Return(s string, err error) *ClickHouseClient_ExplainQuery_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_ExplainQuery_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection, query string) (string, error)) *ClickHouseClient_ExplainQuery_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetClusterConfig provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetClusterConfig(ctx context.Context, conn *entity.CHConnection) (*entity.ClusterInfo, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetClusterConfig")
+	}
+
+	var r0 *entity.ClusterInfo
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) (*entity.ClusterInfo, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) *entity.ClusterInfo); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.ClusterInfo)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetClusterConfig_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetClusterConfig'
+type ClickHouseClient_GetClusterConfig_Call struct {
+	*mock.Call
+}
+
+// GetClusterConfig is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetClusterConfig(ctx interface{}, conn interface{}) *ClickHouseClient_GetClusterConfig_Call {
+	return &ClickHouseClient_GetClusterConfig_Call{Call: _e.mock.On("GetClusterConfig", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetClusterConfig_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetClusterConfig_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetClusterConfig_Call) Return(clusterInfo *entity.ClusterInfo, err error) *ClickHouseClient_GetClusterConfig_Call {
+	_c.Call.Return(clusterInfo, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetClusterConfig_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) (*entity.ClusterInfo, error)) *ClickHouseClient_GetClusterConfig_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -252,6 +466,210 @@ func (_c *ClickHouseClient_GetDatabases_Call) RunAndReturn(run func(ctx context.
 	return _c
 }
 
+// GetLogConfig provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetLogConfig(ctx context.Context, conn *entity.CHConnection) (*entity.LogConfig, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLogConfig")
+	}
+
+	var r0 *entity.LogConfig
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) (*entity.LogConfig, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) *entity.LogConfig); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.LogConfig)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetLogConfig_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLogConfig'
+type ClickHouseClient_GetLogConfig_Call struct {
+	*mock.Call
+}
+
+// GetLogConfig is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetLogConfig(ctx interface{}, conn interface{}) *ClickHouseClient_GetLogConfig_Call {
+	return &ClickHouseClient_GetLogConfig_Call{Call: _e.mock.On("GetLogConfig", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetLogConfig_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetLogConfig_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetLogConfig_Call) Return(logConfig *entity.LogConfig, err error) *ClickHouseClient_GetLogConfig_Call {
+	_c.Call.Return(logConfig, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetLogConfig_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) (*entity.LogConfig, error)) *ClickHouseClient_GetLogConfig_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetProcessStats provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetProcessStats(ctx context.Context, conn *entity.CHConnection) (*entity.ProcessStats, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetProcessStats")
+	}
+
+	var r0 *entity.ProcessStats
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) (*entity.ProcessStats, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) *entity.ProcessStats); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.ProcessStats)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetProcessStats_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetProcessStats'
+type ClickHouseClient_GetProcessStats_Call struct {
+	*mock.Call
+}
+
+// GetProcessStats is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetProcessStats(ctx interface{}, conn interface{}) *ClickHouseClient_GetProcessStats_Call {
+	return &ClickHouseClient_GetProcessStats_Call{Call: _e.mock.On("GetProcessStats", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetProcessStats_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetProcessStats_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetProcessStats_Call) Return(processStats *entity.ProcessStats, err error) *ClickHouseClient_GetProcessStats_Call {
+	_c.Call.Return(processStats, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetProcessStats_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) (*entity.ProcessStats, error)) *ClickHouseClient_GetProcessStats_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetRoles provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetRoles(ctx context.Context, conn *entity.CHConnection) ([]entity.CHRole, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoles")
+	}
+
+	var r0 []entity.CHRole
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) ([]entity.CHRole, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) []entity.CHRole); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.CHRole)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetRoles_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetRoles'
+type ClickHouseClient_GetRoles_Call struct {
+	*mock.Call
+}
+
+// GetRoles is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetRoles(ctx interface{}, conn interface{}) *ClickHouseClient_GetRoles_Call {
+	return &ClickHouseClient_GetRoles_Call{Call: _e.mock.On("GetRoles", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetRoles_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetRoles_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetRoles_Call) Return(cHRoles []entity.CHRole, err error) *ClickHouseClient_GetRoles_Call {
+	_c.Call.Return(cHRoles, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetRoles_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) ([]entity.CHRole, error)) *ClickHouseClient_GetRoles_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetSchema provides a mock function for the type ClickHouseClient
 func (_mock *ClickHouseClient) GetSchema(ctx context.Context, conn *entity.CHConnection, tableName string) (*entity.TableSchema, error) {
 	ret := _mock.Called(ctx, conn, tableName)
@@ -392,6 +810,150 @@ func (_c *ClickHouseClient_GetServerInfo_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// GetSettings provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetSettings(ctx context.Context, conn *entity.CHConnection) ([]entity.CHSetting, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSettings")
+	}
+
+	var r0 []entity.CHSetting
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) ([]entity.CHSetting, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) []entity.CHSetting); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.CHSetting)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSettings'
+type ClickHouseClient_GetSettings_Call struct {
+	*mock.Call
+}
+
+// GetSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetSettings(ctx interface{}, conn interface{}) *ClickHouseClient_GetSettings_Call {
+	return &ClickHouseClient_GetSettings_Call{Call: _e.mock.On("GetSettings", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetSettings_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetSettings_Call) Return(cHSettings []entity.CHSetting, err error) *ClickHouseClient_GetSettings_Call {
+	_c.Call.Return(cHSettings, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetSettings_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) ([]entity.CHSetting, error)) *ClickHouseClient_GetSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetStoragePolicies provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetStoragePolicies(ctx context.Context, conn *entity.CHConnection) ([]entity.StoragePolicy, []entity.Disk, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStoragePolicies")
+	}
+
+	var r0 []entity.StoragePolicy
+	var r1 []entity.Disk
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) ([]entity.StoragePolicy, []entity.Disk, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) []entity.StoragePolicy); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.StoragePolicy)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) []entity.Disk); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).([]entity.Disk)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, *entity.CHConnection) error); ok {
+		r2 = returnFunc(ctx, conn)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// ClickHouseClient_GetStoragePolicies_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetStoragePolicies'
+type ClickHouseClient_GetStoragePolicies_Call struct {
+	*mock.Call
+}
+
+// GetStoragePolicies is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetStoragePolicies(ctx interface{}, conn interface{}) *ClickHouseClient_GetStoragePolicies_Call {
+	return &ClickHouseClient_GetStoragePolicies_Call{Call: _e.mock.On("GetStoragePolicies", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetStoragePolicies_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetStoragePolicies_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetStoragePolicies_Call) Return(storagePolicys []entity.StoragePolicy, disks []entity.Disk, err error) *ClickHouseClient_GetStoragePolicies_Call {
+	_c.Call.Return(storagePolicys, disks, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetStoragePolicies_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) ([]entity.StoragePolicy, []entity.Disk, error)) *ClickHouseClient_GetStoragePolicies_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetTables provides a mock function for the type ClickHouseClient
 func (_mock *ClickHouseClient) GetTables(ctx context.Context, conn *entity.CHConnection) ([]entity.TableMeta, error) {
 	ret := _mock.Called(ctx, conn)
@@ -456,6 +1018,74 @@ func (_c *ClickHouseClient_GetTables_Call) Return(tableMetas []entity.TableMeta,
 }
 
 func (_c *ClickHouseClient_GetTables_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) ([]entity.TableMeta, error)) *ClickHouseClient_GetTables_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUsers provides a mock function for the type ClickHouseClient
+func (_mock *ClickHouseClient) GetUsers(ctx context.Context, conn *entity.CHConnection) ([]entity.CHUser, error) {
+	ret := _mock.Called(ctx, conn)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUsers")
+	}
+
+	var r0 []entity.CHUser
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) ([]entity.CHUser, error)); ok {
+		return returnFunc(ctx, conn)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *entity.CHConnection) []entity.CHUser); ok {
+		r0 = returnFunc(ctx, conn)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.CHUser)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *entity.CHConnection) error); ok {
+		r1 = returnFunc(ctx, conn)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// ClickHouseClient_GetUsers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUsers'
+type ClickHouseClient_GetUsers_Call struct {
+	*mock.Call
+}
+
+// GetUsers is a helper method to define mock.On call
+//   - ctx context.Context
+//   - conn *entity.CHConnection
+func (_e *ClickHouseClient_Expecter) GetUsers(ctx interface{}, conn interface{}) *ClickHouseClient_GetUsers_Call {
+	return &ClickHouseClient_GetUsers_Call{Call: _e.mock.On("GetUsers", ctx, conn)}
+}
+
+func (_c *ClickHouseClient_GetUsers_Call) Run(run func(ctx context.Context, conn *entity.CHConnection)) *ClickHouseClient_GetUsers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *entity.CHConnection
+		if args[1] != nil {
+			arg1 = args[1].(*entity.CHConnection)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *ClickHouseClient_GetUsers_Call) Return(cHUsers []entity.CHUser, err error) *ClickHouseClient_GetUsers_Call {
+	_c.Call.Return(cHUsers, err)
+	return _c
+}
+
+func (_c *ClickHouseClient_GetUsers_Call) RunAndReturn(run func(ctx context.Context, conn *entity.CHConnection) ([]entity.CHUser, error)) *ClickHouseClient_GetUsers_Call {
 	_c.Call.Return(run)
 	return _c
 }

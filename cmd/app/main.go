@@ -47,7 +47,7 @@ func init() {
 // @in							header
 // @name						Authorization
 // @license.url 				http://www.apache.org/licenses/LICENSE-2.0.html
-// @host 						localhost:7011
+// @host 						localhost:7012
 // @BasePath /
 func main() {
 	// Initialize config variable from .env file
@@ -95,14 +95,15 @@ func main() {
 		log.Fatal("Failed to connect to SQLite:", err)
 	}
 	// Migrate
-	sqliteDB.AutoMigrate(&entity.CHConnection{}, &entity.SlowQueryReport{}, &entity.QueryHistory{})
+	sqliteDB.AutoMigrate(&entity.CHConnection{}, &entity.SlowQueryReport{}, &entity.QueryHistory{}, &entity.FavoriteComparison{})
 
 	// CH Manager Dependencies
 	chClient := clickhouse.NewClickHouseClient()
 	connectionRepo := sqlite.NewConnectionRepository(sqliteDB)
 	historyRepo := sqlite.NewQueryHistoryRepository(sqliteDB)
+	favRepo := sqlite.NewFavoriteRepository(sqliteDB)
 	reportRepo := sqlite.NewReportRepository(sqliteDB)
-	connectionUsecase := usecase.NewConnectionUsecase(connectionRepo, historyRepo, chClient)
+	connectionUsecase := usecase.NewConnectionUsecase(connectionRepo, historyRepo, favRepo, chClient)
 	reportUsecase := usecase.NewReportUsecase(reportRepo, connectionRepo, chClient)
 
 	api := app.Group("/api/v1")
