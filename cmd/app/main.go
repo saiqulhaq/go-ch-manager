@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -160,6 +161,10 @@ func setupMiddleware(app *fiber.App, cfg *config.Config) {
 }
 
 func runServerWithGracefulShutdown(app *fiber.App, apiPort string, shutdownTimeout int) {
+	if apiPort != "" && !strings.Contains(apiPort, ":") {
+		apiPort = ":" + apiPort
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
