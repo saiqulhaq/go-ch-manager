@@ -86,6 +86,9 @@ database/sqlite/*
 # Wails build artifacts
 cmd/desktop/build/
 cmd/desktop/frontend/node_modules/
+# Keep a minimal tracked desktop entrypoint so packaged app can start.
+!cmd/desktop/frontend/dist/
+!cmd/desktop/frontend/dist/index.html
 cmd/desktop/frontend/dist/wailsbindings.js
 cmd/desktop/frontend/wailsjs/
 cmd/desktop/database/
