@@ -105,12 +105,12 @@ func (a *App) GetConfigurationData(id int64) (*entity.ConfigurationData, error) 
 
 // GetSlowQueries returns slow query reports
 func (a *App) GetSlowQueries(connectionID int64) ([]*entity.SlowQueryReport, error) {
-	reports, _, err := a.reportUC.GetTopSlowQueries(a.ctx, connectionID, false)
+	reports, _, err := a.reportUC.GetTopSlowQueries(a.ctx, connectionID, "all", false)
 	return reports, err
 }
 
 // RefreshSlowQueries refreshes slow query data from ClickHouse
 func (a *App) RefreshSlowQueries(connectionID int64) error {
-	_, _, err := a.reportUC.GetTopSlowQueries(a.ctx, connectionID, true)
+	_, _, err := a.reportUC.GetTopSlowQueries(a.ctx, connectionID, "all", true)
 	return err
 }

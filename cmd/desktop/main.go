@@ -36,7 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to SQLite:", err)
 	}
-	if err := sqliteDB.AutoMigrate(&entity.CHConnection{}, &entity.SlowQueryReport{}, &entity.QueryHistory{}); err != nil {
+	if err := sqliteDB.AutoMigrate(&entity.CHConnection{}, &entity.SlowQueryReport{}, &entity.QueryHistory{}, &entity.FavoriteComparison{}); err != nil {
 		log.Fatal("Failed to migrate SQLite schema:", err)
 	}
 
@@ -44,8 +44,9 @@ func main() {
 	chClient := clickhouse.NewClickHouseClient()
 	connectionRepo := sqlite.NewConnectionRepository(sqliteDB)
 	historyRepo := sqlite.NewQueryHistoryRepository(sqliteDB)
+	favoriteRepo := sqlite.NewFavoriteRepository(sqliteDB)
 	reportRepo := sqlite.NewReportRepository(sqliteDB)
-	connectionUsecase := usecase.NewConnectionUsecase(connectionRepo, historyRepo, chClient)
+	connectionUsecase := usecase.NewConnectionUsecase(connectionRepo, historyRepo, favoriteRepo, chClient)
 	reportUsecase := usecase.NewReportUsecase(reportRepo, connectionRepo, chClient)
 
 	// Create Wails app instance
